@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">GeoQuiz</string>
+
+    <string name="question_text"> New York is the largest city in USA.</string>
+    <string name="true_button"> true</string>
+    <string name="false_button"> false</string>
+
+</resources>
