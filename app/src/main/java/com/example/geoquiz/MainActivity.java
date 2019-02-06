@@ -1,6 +1,8 @@
 package com.example.geoquiz;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -15,6 +17,8 @@ public class MainActivity extends AppCompatActivity {
     private Button mNextButton;
     private Button mCheatButton;
     private TextView mQuestionTextView;
+    private static final int REQUEST_CODE_CHEAT = 0;
+    private boolean mIsCheater;
 
     private Question[] mQuestionBank = new Question[] {
             new Question(R.string.question_1, true),
@@ -28,15 +32,19 @@ public class MainActivity extends AppCompatActivity {
 
         int messageResId = 0;
 
-        if (userPressedTrue == answerIsTrue) {
-            messageResId = R.string.correct_toast;
+        if (mIsCheater) {
+            messageResId = R.string.judgement_toast;
         }
         else {
-            messageResId = R.string.incorrect_toast;
+            if (userPressedTrue == answerIsTrue) {
+                messageResId = R.string.correct_toast;
+            }
+            else {
+                messageResId = R.string.incorrect_toast;
+            }
+
         }
-
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
-
     }
 
     private void updateQuestion() {
@@ -78,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
             mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
             //int question = mQuestionBank[mCurrentIndex].getTextResID();
            //mQuestionTextView.setText(question);
+                mIsCheater = false;
                 updateQuestion();
 
             }
@@ -86,9 +95,27 @@ public class MainActivity extends AppCompatActivity {
         mCheatButton = findViewById(R.id.cheat_button);
         mCheatButton.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v){
-                        Intent i = new Intent(MainActivity.this, CheatActivity.class);
-                        startActivity(i);
+                        //Intent i = new Intent(MainActivity.this, CheatActivity.class);
+                        boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+                        Intent i = CheatActivity.newIntent(MainActivity.this, answerIsTrue);
+                        //startActivity(i);
+                        startActivityForResult(i, REQUEST_CODE_CHEAT);
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (resultCode != Activity.RESULT_OK) {
+            return;
+        }
+
+        if (requestCode == REQUEST_CODE_CHEAT) {
+            if (data == null) {
+                return;
+            }
+            mIsCheater = CheatActivity.setAnswerShown(data);
+        }
+
     }
 }
